@@ -18,13 +18,11 @@ class TinerInsightAnalysis:
 
     def _prepare_data(self):
         """데이터 전처리"""
-        # 한글 컬럼 제거
-        self.df = self.df.loc[:, ~self.df.columns.str.contains('^[가-힣]', regex=True)]
-
         # 날짜 변환
-        self.df['REG_DT'] = pd.to_datetime(self.df['REG_DT'], errors='coerce')
-        self.df['YEAR_MONTH'] = self.df['REG_DT'].dt.to_period('M')
-        self.df['MONTH'] = self.df['REG_DT'].dt.month
+        if '리뷰등록일' in self.df.columns:
+            self.df['리뷰등록일'] = pd.to_datetime(self.df['리뷰등록일'], errors='coerce')
+            self.df['YEAR_MONTH'] = self.df['리뷰등록일'].dt.to_period('M')
+            self.df['MONTH'] = self.df['리뷰등록일'].dt.month
 
         # 감정 정규화
         if 'OVERALL_SENTIMENT' in self.df.columns:
@@ -322,7 +320,10 @@ class TinerInsightAnalysis:
     def get_summary(self):
         """전체 분석 요약"""
         try:
-            date_range = f"{self.df['REG_DT'].min().date()} ~ {self.df['REG_DT'].max().date()}"
+            if '리뷰등록일' in self.df.columns:
+                date_range = f"{self.df['리뷰등록일'].min().date()} ~ {self.df['리뷰등록일'].max().date()}"
+            else:
+                date_range = "데이터 확인 중"
         except:
             date_range = "데이터 확인 중"
 

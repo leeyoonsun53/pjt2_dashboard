@@ -564,7 +564,7 @@ elif page == "📑 상세 데이터":
 
     # 주요 컬럼만 선택해서 표시
     display_columns = [
-        'REG_DT', 'ONE_LINE_SUMMARY', 'OVERALL_SENTIMENT',
+        '리뷰등록일', 'ONE_LINE_SUMMARY', 'OVERALL_SENTIMENT',
         'ABSORPTION_SENTIMENT', 'FINISH_SENTIMENT', 'MOISTURE_SENTIMENT',
         'SCENT_SENTIMENT', 'PURCHASE_TYPE', 'SKIN_TYPE_FINAL'
     ]
@@ -573,7 +573,7 @@ elif page == "📑 상세 데이터":
     existing_columns = [col for col in display_columns if col in filtered_df.columns]
 
     st.dataframe(
-        filtered_df[existing_columns].sort_values('REG_DT', ascending=False),
+        filtered_df[existing_columns].sort_values('리뷰등록일', ascending=False) if '리뷰등록일' in existing_columns else filtered_df[existing_columns],
         use_container_width=True,
         height=400
     )
