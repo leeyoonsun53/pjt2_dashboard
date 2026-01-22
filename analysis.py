@@ -18,23 +18,33 @@ class TinerInsightAnalysis:
 
     def _prepare_data(self):
         """데이터 전처리"""
+        # 한글 컬럼 제거
+        self.df = self.df.loc[:, ~self.df.columns.str.contains('^[가-힣]', regex=True)]
+
         # 날짜 변환
-        self.df['REVIEW_DATE'] = pd.to_datetime(self.df['REVIEW_DATE'], errors='coerce')
-        self.df['YEAR_MONTH'] = self.df['REVIEW_DATE'].dt.to_period('M')
-        self.df['MONTH'] = self.df['REVIEW_DATE'].dt.month
+        self.df['REG_DT'] = pd.to_datetime(self.df['REG_DT'], errors='coerce')
+        self.df['YEAR_MONTH'] = self.df['REG_DT'].dt.to_period('M')
+        self.df['MONTH'] = self.df['REG_DT'].dt.month
 
         # 감정 정규화
-        self.df['OVERALL_SENTIMENT'] = self.df['OVERALL_SENTIMENT'].str.upper()
-        self.df['ABSORPTION_SENTIMENT'] = self.df['ABSORPTION_SENTIMENT'].str.upper()
-        self.df['FINISH_SENTIMENT'] = self.df['FINISH_SENTIMENT'].str.upper()
-        self.df['MOISTURE_SENTIMENT'] = self.df['MOISTURE_SENTIMENT'].str.upper()
-        self.df['SCENT_SENTIMENT'] = self.df['SCENT_SENTIMENT'].str.upper()
+        if 'OVERALL_SENTIMENT' in self.df.columns:
+            self.df['OVERALL_SENTIMENT'] = self.df['OVERALL_SENTIMENT'].fillna('NEUTRAL').str.upper()
+        if 'ABSORPTION_SENTIMENT' in self.df.columns:
+            self.df['ABSORPTION_SENTIMENT'] = self.df['ABSORPTION_SENTIMENT'].fillna('NEUTRAL').str.upper()
+        if 'FINISH_SENTIMENT' in self.df.columns:
+            self.df['FINISH_SENTIMENT'] = self.df['FINISH_SENTIMENT'].fillna('NEUTRAL').str.upper()
+        if 'MOISTURE_SENTIMENT' in self.df.columns:
+            self.df['MOISTURE_SENTIMENT'] = self.df['MOISTURE_SENTIMENT'].fillna('NEUTRAL').str.upper()
+        if 'SCENT_SENTIMENT' in self.df.columns:
+            self.df['SCENT_SENTIMENT'] = self.df['SCENT_SENTIMENT'].fillna('NEUTRAL').str.upper()
 
         # 피부 타입 정규화
-        self.df['SKIN_TYPE_FINAL'] = self.df['SKIN_TYPE_FINAL'].fillna('미분류')
+        if 'SKIN_TYPE_FINAL' in self.df.columns:
+            self.df['SKIN_TYPE_FINAL'] = self.df['SKIN_TYPE_FINAL'].fillna('미분류')
 
         # 구매 유형 정규화
-        self.df['PURCHASE_TYPE'] = self.df['PURCHASE_TYPE'].fillna('미분류')
+        if 'PURCHASE_TYPE' in self.df.columns:
+            self.df['PURCHASE_TYPE'] = self.df['PURCHASE_TYPE'].fillna('미분류')
 
     # ===== IDEA 1: 흡수력과 재구매의 관계 =====
     def idea1_absorption_repurchase(self):
@@ -311,12 +321,22 @@ class TinerInsightAnalysis:
     # ===== 종합 요약 =====
     def get_summary(self):
         """전체 분석 요약"""
+        try:
+            date_range = f"{self.df['REG_DT'].min().date()} ~ {self.df['REG_DT'].max().date()}"
+        except:
+            date_range = "데이터 확인 중"
+
+        total = len(self.df)
+        positive_count = (self.df['OVERALL_SENTIMENT'] == 'POSITIVE').sum() if 'OVERALL_SENTIMENT' in self.df.columns else 0
+        negative_count = (self.df['OVERALL_SENTIMENT'] == 'NEGATIVE').sum() if 'OVERALL_SENTIMENT' in self.df.columns else 0
+        neutral_count = (self.df['OVERALL_SENTIMENT'] == 'NEUTRAL').sum() if 'OVERALL_SENTIMENT' in self.df.columns else 0
+
         return {
-            'total_reviews': len(self.df),
-            'date_range': f"{self.df['REVIEW_DATE'].min().date()} ~ {self.df['REVIEW_DATE'].max().date()}",
-            'positive_ratio': f"{(self.df['OVERALL_SENTIMENT'] == 'POSITIVE').sum() / len(self.df) * 100:.2f}%",
-            'negative_ratio': f"{(self.df['OVERALL_SENTIMENT'] == 'NEGATIVE').sum() / len(self.df) * 100:.2f}%",
-            'neutral_ratio': f"{(self.df['OVERALL_SENTIMENT'] == 'NEUTRAL').sum() / len(self.df) * 100:.2f}%"
+            'total_reviews': total,
+            'date_range': date_range,
+            'positive_ratio': f"{positive_count / total * 100:.2f}%" if total > 0 else "0%",
+            'negative_ratio': f"{negative_count / total * 100:.2f}%" if total > 0 else "0%",
+            'neutral_ratio': f"{neutral_count / total * 100:.2f}%" if total > 0 else "0%"
         }
 
 

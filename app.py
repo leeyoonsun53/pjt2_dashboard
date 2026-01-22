@@ -61,7 +61,7 @@ if page == "📈 대시보드 개요":
         st.metric("😞 부정", summary['negative_ratio'])
 
     with col5:
-        st.metric("📅 분석 기간", summary['date_range'])
+        st.metric("📅 분석 기간", summary['date_range'] if 'date_range' in summary else "데이터 확인 중")
 
     st.markdown("---")
 
@@ -564,19 +564,22 @@ elif page == "📑 상세 데이터":
 
     # 주요 컬럼만 선택해서 표시
     display_columns = [
-        'REVIEW_DATE', 'ONE_LINE_SUMMARY', 'OVERALL_SENTIMENT',
+        'REG_DT', 'ONE_LINE_SUMMARY', 'OVERALL_SENTIMENT',
         'ABSORPTION_SENTIMENT', 'FINISH_SENTIMENT', 'MOISTURE_SENTIMENT',
         'SCENT_SENTIMENT', 'PURCHASE_TYPE', 'SKIN_TYPE_FINAL'
     ]
 
+    # 존재하는 컬럼만 선택
+    existing_columns = [col for col in display_columns if col in filtered_df.columns]
+
     st.dataframe(
-        filtered_df[display_columns].sort_values('REVIEW_DATE', ascending=False),
+        filtered_df[existing_columns].sort_values('REG_DT', ascending=False),
         use_container_width=True,
         height=400
     )
 
     # 다운로드 버튼
-    csv = filtered_df[display_columns].to_csv(index=False, encoding='utf-8-sig')
+    csv = filtered_df[existing_columns].to_csv(index=False, encoding='utf-8-sig')
     st.download_button(
         label="📥 필터링된 데이터 다운로드 (CSV)",
         data=csv,
