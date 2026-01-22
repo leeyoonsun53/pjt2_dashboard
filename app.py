@@ -24,7 +24,9 @@ st.set_page_config(
 # 캐싱을 통한 데이터 로드
 @st.cache_resource
 def load_analysis():
-    return TinerInsightAnalysis('data/올영리뷰_토너.csv')
+    import os
+    csv_path = os.path.join(os.path.dirname(__file__), 'data', '올영리뷰_토너.csv')
+    return TinerInsightAnalysis(csv_path)
 
 # 분석 객체 로드
 analysis = load_analysis()

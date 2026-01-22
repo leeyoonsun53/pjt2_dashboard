@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 class TinerInsightAnalysis:
     def __init__(self, csv_path):
         """데이터 로드 및 초기화"""
-        self.df = pd.read_csv(csv_path)
+        self.df = pd.read_csv(csv_path, encoding='utf-8')
         self._prepare_data()
 
     def _prepare_data(self):
