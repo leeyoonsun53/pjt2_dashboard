@@ -14,7 +14,21 @@ class TinerInsightAnalysis:
     def __init__(self, csv_path):
         """데이터 로드 및 초기화"""
         self.df = pd.read_csv(csv_path, encoding='utf-8')
+        self.product_list = []
         self._prepare_data()
+
+    def get_products(self):
+        """제품 목록 반환"""
+        if '브랜드명' in self.df.columns:
+            self.product_list = self.df['브랜드명'].unique().tolist()
+            return self.product_list
+        return []
+
+    def get_product_data(self, product_name):
+        """제품별 데이터 반환"""
+        if '브랜드명' in self.df.columns:
+            return self.df[self.df['브랜드명'] == product_name].copy()
+        return self.df.copy()
 
     def _prepare_data(self):
         """데이터 전처리"""
