@@ -17,15 +17,25 @@ class TinerInsightAnalysis:
             self.df = pd.read_csv(csv_path, encoding='utf-8-sig')
         except UnicodeDecodeError:
             self.df = pd.read_csv(csv_path, encoding='cp949')
+        self.original_df = self.df.copy()
         self.product_list = []
         self._prepare_data()
 
     def get_products(self):
         """제품 목록 반환"""
-        if '브랜드명' in self.df.columns:
-            self.product_list = self.df['브랜드명'].unique().tolist()
+        if '브랜드명' in self.original_df.columns:
+            self.product_list = sorted(self.original_df['브랜드명'].unique().tolist())
             return self.product_list
         return []
+
+    def set_product(self, product_name):
+        """제품별 데이터 설정"""
+        if product_name == "전체":
+            self.df = self.original_df.copy()
+        elif '브랜드명' in self.original_df.columns:
+            self.df = self.original_df[self.original_df['브랜드명'] == product_name].copy()
+        else:
+            self.df = self.original_df.copy()
 
     def get_product_data(self, product_name):
         """제품별 데이터 반환"""

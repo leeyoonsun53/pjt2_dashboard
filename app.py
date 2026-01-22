@@ -35,22 +35,12 @@ analysis = load_analysis()
 st.sidebar.title("📊 토너 리뷰 인사이트 대시보드")
 
 # 제품 선택 - 직접 데이터프레임에서 가져오기
-if '브랜드명' in analysis.df.columns:
-    products = sorted(analysis.df['브랜드명'].unique().tolist())
-else:
-    products = []
+products = analysis.get_products()
 
-selected_product = st.sidebar.selectbox("📦 제품 선택", products if products else ["전체"])
+selected_product = st.sidebar.selectbox("📦 제품 선택", ["전체"] + products if products else ["전체"])
 
-# 선택된 제품의 데이터 추출
-if selected_product != "전체" and selected_product in products and '브랜드명' in analysis.df.columns:
-    product_df = analysis.df[analysis.df['브랜드명'] == selected_product].copy()
-else:
-    product_df = analysis.df.copy()
-
-# 분석 객체 업데이트 (제품별 분석을 위해 임시 df 교체)
-original_df = analysis.df
-analysis.df = product_df
+# 선택된 제품의 데이터 설정
+analysis.set_product(selected_product)
 
 page = st.sidebar.radio(
     "메뉴",
