@@ -13,7 +13,10 @@ warnings.filterwarnings('ignore')
 class TinerInsightAnalysis:
     def __init__(self, csv_path):
         """데이터 로드 및 초기화"""
-        self.df = pd.read_csv(csv_path, encoding='utf-8')
+        try:
+            self.df = pd.read_csv(csv_path, encoding='utf-8-sig')
+        except UnicodeDecodeError:
+            self.df = pd.read_csv(csv_path, encoding='cp949')
         self.product_list = []
         self._prepare_data()
 
